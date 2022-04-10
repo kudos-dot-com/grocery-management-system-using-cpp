@@ -2,8 +2,10 @@
 #include <bits/stdc++.h>
 #include<string>
 #include <vector>
+#include "TextTable.h"
 
 using namespace std;
+
 
 class admin{
  public:   
@@ -20,29 +22,28 @@ class admin{
  }
 };
 
+struct purchase{
+        string name;
+        string phone;
+        double total;
+        double profit;
+        double pp;
+}; 
 class users: public admin
 {   
-    // bool checkAdmin(string email, string password)
-    // {
-    //     // if()
-    // }
-
-    void addNewUser(string email, string name, string mobile)
+    public:
+    void addNewPurchase(string name, string phone,double total,double profit,double pp,vector<purchase>& purchases)
     {
-        struct {
-        string email;
-        string password;
-    } user;
-    // vector<user> users
-// 
+        purchase p;
+        p.name = name;
+        p.phone = phone;
+        p.total = total;
+        p.profit = profit;
+        p.pp = pp;
+        purchases.push_back(p);
 
+        
     }
-
-    auto getallusers()
-    {
-            
-    }
-
 };
 
 // public:
@@ -54,7 +55,7 @@ struct prod{
         double sellingprice;
         int Stock;
 }; 
-class Inventory
+class Inventory: public users
 {
     // product p;
     // public:
@@ -130,99 +131,228 @@ class Inventory
     }
     public:   
     auto getProducts(vector<prod>& products){
-        cout << "sku \t name \t price \t stock\t" << endl;
+        TextTable t( '-', '|', '+' );
+
+        t.add( "SL NO." );
+        t.add( "SKU" );
+        t.add( "NAME" );
+        t.add( "COST PRICE" );
+        t.add( "SELLING PRICE" );
+        t.add( "STOCK" );
+        t.endOfRow(); 
 
         for(auto i = 0; i < products.size(); i++)
         {
-            cout << products[i].sku << " " << products[i].name << " " << products[i].costprice << " " << products[i].Stock << endl;
+            t.add( to_string(i+1) );
+            t.add( products[i].sku );
+            t.add( products[i].name );
+            t.add( to_string(products[i].costprice));
+            t.add( to_string(products[i].sellingprice));
+            t.add( to_string(products[i].Stock) );
+            t.endOfRow(); 
+
         }
+
+        t.setAlignment( 2, TextTable::Alignment::RIGHT );
+        std::cout << t;
     }
+
+   void allPurchases(vector<purchase>& purchases)
+    {
+        TextTable t( '-', '|', '+' );
+        t.add("Name");
+        t.add("Phone");
+        t.add("Total");
+        t.add("Profit Made");
+        t.add("Profit percentage");
+        t.endOfRow();
+        for(int i = 0; i < purchases.size(); i++)
+        {
+            t.add(purchases[i].name);
+            t.add(purchases[i].phone);
+            t.add(to_string(purchases[i].total));
+            t.add(to_string(purchases[i].profit));
+            t.add(to_string(purchases[i].pp)+"%");
+            t.endOfRow();
+        }
+        cout << t << endl;
+    }   
+   
 };
 
-class Billing: public Inventory
+class Billing:public users
 {   public:
     struct items{
         string sku;
         string name;
         double price;
+        double cprice;
         int quantity;
     }; 
+    public:
     vector<items> cart;
     items item; 
+
     public:   
     auto getProducts(vector<prod>& products){
-        cout << "<----------------------ALL AVAILABLE PRODUCTS---------------->" << endl;
-        
-        cout << "sku \t name \t price \t stock\t" << endl;
+        cout << "<---------------------- ALL AVAILABLE PRODUCT IN THE SHOP---------------->" << endl;
+        TextTable t( '-', '|', '+' );
+
+        t.add( "SL NO." );
+        t.add( "SKU" );
+        t.add( "NAME" );
+        t.add( "PRICE" );
+        t.add( "STOCK" );
+        t.endOfRow(); 
         cout << products.size() << endl;
         for(auto i = 0; i < products.size(); i++)
         {
-            cout << i+1 << " " << products[i].sku << " " << products[i].name << " " << products[i].sellingprice << " " << products[i].Stock << endl;
+            // cout << i << " " << products[i].sku << " " << products[i].name << " " << products[i].sellingprice << " " << products[i].Stock << endl;
+            t.add( to_string(i+1) );
+            t.add( products[i].sku );
+            t.add( products[i].name );
+            t.add( to_string(products[i].sellingprice) );
+            t.add( to_string(products[i].Stock));
+
+            t.endOfRow();
         }
+        t.setAlignment( 2, TextTable::Alignment::RIGHT );
+        std::cout << t;
     }    
 
     public:
     void addtocart(int sl,vector<prod>& products)
     {   int i=sl-1;
 
-        cout << "Enter the quantity: ";
+        cout << "ENTER THE QUANTITY: ";
         cin >> item.quantity;
+        
         
         if(products[i].Stock == 0)
         {
-             cout << "out of stock" << endl;
+             cout << "OUT OF STOCK" << endl;
+        }
+        else if(sl>products.size())
+        {
+            cout << "INVALID SKU ID" << endl;
+        }
+        else if(item.quantity>products[i].Stock)
+        {
+            cout << "INVALID QUANTITY" << endl;
+        }
+        else
+        {
+            item.sku = products[i].sku;
+            item.name = products[i].name;
+            item.price = products[i].sellingprice;
+            item.cprice = products[i].costprice;
+            cart.push_back(item);
+            products[i].Stock = products[i].Stock - item.quantity;
+            cout << "ADDED TO CART" << endl;
+        }
+        {
+            cout << "INVALID QUANTITY" << endl;
+        }
+        else
+        {
+            item.sku = products[i].sku;
+            item.name = products[i].name;
+            item.price = products[i].sellingprice;
+            item.cprice = products[i].costprice;
+            cart.push_back(item);
+            products[i].Stock = products[i].Stock - quantity;
+            cout << "ADDED TO CART" << endl;
         }
         else if((products[i].Stock-item.quantity)<0)
         {
-            cout << "you can only buy"<< "" << products[i].Stock << ""<< endl;
+            system("Color 0A");
+            cout << "SORRY YOU CAN ONLY BUY :"<< "" << products[i].Stock << ""<< endl;
         }else
         {
         item.name = products[i].name;
         item.price = products[i].sellingprice;
+        item.cprice = products[i].costprice;
+
         item.sku = products[i].sku;
 
         products[i].Stock-=item.quantity;
 
         cart.push_back(item);
-
-         
-        cout << "Product added to cart successfully." <<endl;
+        cout<< cart.size() << endl;
+        system("Color 0A");
+        cout << "PRODUCT ADDED TO CART SUCCESSFULLY" <<endl;
         }
 
         // cout << products[i].sku << " " << products[i].name << " " << products[i].costprice << " " << products[i].Stock << endl;
     }
 
     public:
-    void deletefromcart(int n)
-    {
+    void deletefromcart(int n,int q,vector<prod>& products)
+    {   n-=1;
         cout << "Enter the sl no: ";
         // cin >> product.sku;
         cart.erase(cart.begin() + n);
-        
+        products[n].Stock+=q;
         cout << "Product deleted successfully" << endl;
 
     }
+    public:
     void viewcart()
     {
+        // cout <<"\n" << endl;
+        cout << "<---------------------- YOUR CART ---------------->" << endl;
         
-        cout << "<----------------------ALL AVAILABLE PRODUCTS---------------->" << endl;
-        
-        cout << "sku \t name \t price \t stock\t" << endl;
+        TextTable t( '-', '|', '+' );
+
+        t.add( "SL NO." );
+        t.add( "SKU" );
+        t.add( "NAME" );
+        t.add( "PRICE" );
+        t.add( "QUANTITY" );
+        t.endOfRow(); 
 
         for(auto i = 0; i < cart.size(); i++)
         {
-            cout << i+1 << " " << cart[i].sku << " " << cart[i].name << " " << cart[i].price << " " << cart[i].quantity << " " << endl;
+            t.add( to_string(i+1) );
+            t.add( cart[i].sku );
+            t.add( cart[i].name );
+            t.add( to_string(cart[i].price) );
+            t.add( to_string(cart[i].quantity));
+            t.endOfRow(); 
+
         }
+        t.setAlignment( 2, TextTable::Alignment::RIGHT );
+        std::cout << t;
     }
-    void checkout()
+    void checkout(vector<purchase>& purchases)
     {   
-        double sum = 0.0;
+        TextTable t( '-', '|', '+' );
+        double sum = 0.0,profit,pp;
+        string name,phone;
         for(auto i = 0; i < cart.size(); i++)
         {
             sum += cart[i].price * cart[i].quantity;
-        }   
-        cout << sum << endl;
+            profit += cart[i].cprice * cart[i].quantity;
 
+        }
+        // enter details
+        cout << "ENTER YOUR NAME: ";
+        cin >> name;
+        cout << "ENTER YOUR PHONE NUMBER: ";
+        cin >> phone;
+        t.add( "NAME" );
+        t.add( (name) );
+        t.endOfRow(); 
+
+        t.add( "PHONE" );
+        t.add( (phone));
+        t.endOfRow(); 
+
+        t.add( "TOTAL" );
+        t.add( to_string(sum));
+        pp = (sum-profit)/100;
+        addNewPurchase(name,phone,sum,profit,pp,purchases);
+    
     }
 
 };
@@ -232,16 +362,16 @@ int main()
     users user;
     Inventory stock;
     Billing bill;
-   
+    
     vector<prod> products;
-    // prods product;
-
+    vector<purchase> purchases;
+    
     auto adminCreds = user.adminCreds();
 
 check:
 string email,password;
 int option;
-cout << "Enter your choice: \n  1. Login \n  2. Buy \n  3. Exit \n";
+cout << "Enter your choice: \n  1. LOGIN \n  2. BUY \n  3. EXIT\n";
 
 cin >> option;
 
@@ -273,7 +403,7 @@ switch(option) {
    }
     // ADMIN LOGIN PART
     admin:
-    cout << "Enter your choice: \n  1. Add new product \n  2. Get all product \n 3. delete a product \n 4. update a product \n 5. Exit \n";
+    cout << "ENTER YOUR CHOICE: \n 1. ADD NEW PRODUCT \n  2. GET ALL PRODUCT \n 3. DELETE A PRODUCT \n 4. UPDATE A PRODUCT \n 5. VIEW PURCHASE HISTORY \n 6. EXIT \n";
 
     cin >> option;
 
@@ -290,36 +420,41 @@ switch(option) {
       case 4:
             stock.updateProduct(products);
              goto admin;
-      case 5:
+    case 5:
+            stock.allPurchases(purchases);
+            goto admin;
+      case 6:
             goto check;
       default :
-         cout << "Invalid grade" << endl;
+         cout << "Invalid choice" << endl;
     
     // CUSTOMER AREA
 
     buy:
         bill.getProducts(products);
-        cout << "Enter your choice: \n  1. Add to cart \n  2. delete item from cart \n 3. view cart \n 4. checkout \n 5. Exit \n";
+        cout << "Enter your choice: \n  1. ADD TO CART \n  2. DELETE FROM CART \n 3. VIEW CART \n 4. CHECKOUT \n 5. EXIT \n";
         cin >> option;
 
     switch(option) {
       case 1:
             int n;
-            cout << "Enter sl. Number"<<endl;
+            cout << "ENTER SL. Number"<<endl;
             cin >> n;
             bill.addtocart(n,products);
             goto buy;
       case 2:
-            int n1;
-            cout << "Enter sl. Number"<<endl;
+            int n1,q;
+            cout << "ENTER SL. Number"<<endl;
             cin >> n1;
-            bill.deletefromcart(n1);
+            cout << "ENTER QUANTITY"<<endl;
+            cin >> q;
+            bill.deletefromcart(n1,q,products);
             goto buy;
       case 3:
             bill.viewcart();
             goto buy;
       case 4:
-            bill.checkout();
+            bill.checkout(purchases);
             goto buy;
       case 5:
             goto check;
@@ -330,7 +465,7 @@ switch(option) {
     cout << adminCreds.email << endl;
     cout << adminCreds.password << endl;
     exit:
-    cout << "Thank you for using our service" << endl;
+    cout << "THANKS FOR  USING OUR SERVICE" << endl;
     return 0;
 }
 }
