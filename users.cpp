@@ -3,9 +3,14 @@
 #include<string>
 #include <vector>
 #include "TextTable.h"
+#include <conio.h>
 
 using namespace std;
 
+enum IN {
+    IN_BACK = 8,
+    IN_RET = 13
+};
 
 class admin{
  public:   
@@ -46,7 +51,33 @@ class users: public admin
     }
 };
 
-// public:
+std::string takePasswdFromUser(char sp = '*')
+{
+    string passwd = "";
+    char ch_ipt;
+    while (true) {
+ 
+        ch_ipt = getch();
+        if (ch_ipt == IN::IN_RET) {
+            cout << endl;
+            return passwd;
+        }
+        else if (ch_ipt == IN::IN_BACK
+                 && passwd.length() != 0) {
+            passwd.pop_back();
+            cout << "\b \b";
+ 
+            continue;
+        }
+        else if (ch_ipt == IN::IN_BACK
+                 && passwd.length() == 0) {
+            continue;
+        }
+ 
+        passwd.push_back(ch_ipt);
+        cout << sp;
+    }
+}
 
 struct prod{
         string sku;
@@ -236,36 +267,9 @@ class Billing:public users
         {
             cout << "INVALID SKU ID" << endl;
         }
-        else if(item.quantity>products[i].Stock)
-        {
-            cout << "INVALID QUANTITY" << endl;
-        }
-        else
-        {
-            item.sku = products[i].sku;
-            item.name = products[i].name;
-            item.price = products[i].sellingprice;
-            item.cprice = products[i].costprice;
-            cart.push_back(item);
-            products[i].Stock = products[i].Stock - item.quantity;
-            cout << "ADDED TO CART" << endl;
-        }
-        {
-            cout << "INVALID QUANTITY" << endl;
-        }
-        else
-        {
-            item.sku = products[i].sku;
-            item.name = products[i].name;
-            item.price = products[i].sellingprice;
-            item.cprice = products[i].costprice;
-            cart.push_back(item);
-            products[i].Stock = products[i].Stock - quantity;
-            cout << "ADDED TO CART" << endl;
-        }
         else if((products[i].Stock-item.quantity)<0)
         {
-            system("Color 0A");
+            // system("Color 0A");
             cout << "SORRY YOU CAN ONLY BUY :"<< "" << products[i].Stock << ""<< endl;
         }else
         {
@@ -279,7 +283,7 @@ class Billing:public users
 
         cart.push_back(item);
         cout<< cart.size() << endl;
-        system("Color 0A");
+        // system("Color 0A");
         cout << "PRODUCT ADDED TO CART SUCCESSFULLY" <<endl;
         }
 
@@ -350,6 +354,11 @@ class Billing:public users
 
         t.add( "TOTAL" );
         t.add( to_string(sum));
+        t.endOfRow(); 
+
+        // t.setAlignment( 2, TextTable::Alignment::RIGHT );
+        std::cout << t;
+        cout <<"THANK YOU FOR SHOPPING WITH US!!!"<<endl;
         pp = (sum-profit)/100;
         addNewPurchase(name,phone,sum,profit,pp,purchases);
     
@@ -380,10 +389,12 @@ switch(option) {
             cout << "Enter your email: ";
             cin >> email;
             cout << "Enter your password: ";
-            cin >> password;
+            cout << "@root>>> ";
+            password = takePasswdFromUser();
+            cout << password << endl;
             if(email == adminCreds.email && password == adminCreds.password)
             {
-                cout << "Welcome Admin" << endl;
+                cout << "\n [ WELCOME ADMIN ] " << endl;
                 goto admin;
             }
             else
@@ -455,7 +466,7 @@ switch(option) {
             goto buy;
       case 4:
             bill.checkout(purchases);
-            goto buy;
+            goto check;
       case 5:
             goto check;
       default :
