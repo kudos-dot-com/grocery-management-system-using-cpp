@@ -4,6 +4,8 @@
 #include <vector>
 #include "TextTable.h"
 #include <conio.h>
+#include<stdlib.h>
+#include<stdio.h>
 
 using namespace std;
 
@@ -98,8 +100,9 @@ class Inventory: public users
     public:   
     void addNewProduct(vector<prod>& products)
     {
-        cout << "Enter the sku: ";
-        cin >> product.sku;
+        
+        int id = (rand() % 9000) + 1000;
+        product.sku = to_string(id);
         cout << "Enter the name: ";
         cin >> product.name;
         cout << "Enter the cost price: ";
@@ -109,7 +112,7 @@ class Inventory: public users
         cout << "Enter the stock: ";
         cin >> product.Stock;
         products.push_back(product);
-        cout << "Product added successfully" << endl;
+        cout << "PRODUCT ADDED SUCCESSFULLY" << endl;
     }
     public:   
     auto deleteProduct(vector<prod>& products){
@@ -135,7 +138,7 @@ class Inventory: public users
     }
     public:   
     auto updateProduct(vector<prod>& products){
-        cout << "Enter the sku: ";
+        cout << "ENTER THE SKU ID: ";
         cin >> product.sku;
         int f=0;
         for(auto i = 0; i < products.size(); i++)
@@ -144,8 +147,10 @@ class Inventory: public users
             {
                 cout << "Enter the new name: ";
                 cin >> product.name;
-                cout << "Enter the new price: ";
+                cout << "Enter the new cost price: ";
                 cin >> product.costprice;
+                cout << "Enter the new selling price: ";
+                cin >> product.sellingprice;
                 cout << "Enter the new stock: ";
                 cin >> product.Stock;
                 products[i] = product;
@@ -154,7 +159,7 @@ class Inventory: public users
             }
         }
         if(f==1){
-            cout << "Product updated successfully" << endl;
+            cout << "PRODUCT UPDATED SUCCESSFULLY" << endl;
         }
         else{
             cout << "Invalid SKU ID" << endl;
@@ -293,11 +298,11 @@ class Billing:public users
     public:
     void deletefromcart(int n,int q,vector<prod>& products)
     {   n-=1;
-        cout << "Enter the sl no: ";
+        cout << "ENTER THE SL.NO: ";
         // cin >> product.sku;
         cart.erase(cart.begin() + n);
         products[n].Stock+=q;
-        cout << "Product deleted successfully" << endl;
+        cout << "PRODUCT DELETED FROM CART" << endl;
 
     }
     public:
@@ -331,12 +336,12 @@ class Billing:public users
     void checkout(vector<purchase>& purchases)
     {   
         TextTable t( '-', '|', '+' );
-        double sum = 0.0,profit,pp;
+        double sum = 0.0,profit,pp,totalcp;
         string name,phone;
         for(auto i = 0; i < cart.size(); i++)
         {
             sum += cart[i].price * cart[i].quantity;
-            profit += cart[i].cprice * cart[i].quantity;
+            totalcp += cart[i].cprice * cart[i].quantity;
 
         }
         // enter details
@@ -359,7 +364,8 @@ class Billing:public users
         // t.setAlignment( 2, TextTable::Alignment::RIGHT );
         std::cout << t;
         cout <<"THANK YOU FOR SHOPPING WITH US!!!"<<endl;
-        pp = (sum-profit)/100;
+        profit = sum - totalcp;
+        pp = (profit/totalcp)*100;
         addNewPurchase(name,phone,sum,profit,pp,purchases);
     
     }
@@ -391,10 +397,10 @@ switch(option) {
             cout << "Enter your password: ";
             cout << "@root>>> ";
             password = takePasswdFromUser();
-            cout << password << endl;
+            // cout << password << endl;
             if(email == adminCreds.email && password == adminCreds.password)
             {
-                cout << "\n [ WELCOME ADMIN ] " << endl;
+                cout << "\n[ WELCOME ADMIN ] " << endl;
                 goto admin;
             }
             else
@@ -414,22 +420,25 @@ switch(option) {
    }
     // ADMIN LOGIN PART
     admin:
-    cout << "ENTER YOUR CHOICE: \n 1. ADD NEW PRODUCT \n  2. GET ALL PRODUCT \n 3. DELETE A PRODUCT \n 4. UPDATE A PRODUCT \n 5. VIEW PURCHASE HISTORY \n 6. EXIT \n";
+    cout << "ENTER YOUR CHOICE: \n 1. ADD NEW PRODUCT \n 2. GET ALL PRODUCT \n 3. DELETE A PRODUCT \n 4. UPDATE A PRODUCT \n 5. VIEW PURCHASE HISTORY \n 6. EXIT \n";
 
     cin >> option;
 
     switch(option) {
       case 1:
             stock.addNewProduct(products);
+            stock.getProducts(products);
             goto admin;
       case 2:
             stock.getProducts(products);
              goto admin;
       case 3:
             stock.deleteProduct(products);
+            stock.getProducts(products);
              goto admin;
       case 4:
             stock.updateProduct(products);
+            stock.getProducts(products);
              goto admin;
     case 5:
             stock.allPurchases(purchases);
